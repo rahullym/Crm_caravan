@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String           @id @default(uuid())
+  email           String           @unique
+  password        String
+  role            Role             @default(SALES)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  serviceRequests ServiceRequest[]
+  followUps       LeadFollowUp[]
+}
+
+model Lead {
+  id               String         @id @default(uuid())
+  name             String
+  phone            String         @unique
+  email            String?
+  state            String?
+  source           LeadSource     @default(OTHER)
+  status           LeadStatus     @default(INQUIRY)
+  modelInterest    String?
+  size             String?
+  actionChannel    ActionChannel?
+  nextAction       NextAction?
+  firstContactDate DateTime?
+  nextActionDate   DateTime?
+  customerNotes    String?
+  internalNotes    String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  followUps        LeadFollowUp[]
+}
+
+model LeadFollowUp {
+  id             String        @id @default(uuid())
+  leadId         String
+  lead           Lead          @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  notes          String
+  channel        ActionChannel?
+  nextAction     NextAction?
+  nextActionDate DateTime?
+  authorId       String?
+  author         User?         @relation(fields: [authorId], references: [id])
+  createdAt      DateTime      @default(now())
+}
+
+model Caravan {
+  id             String           @id @default(uuid())
+  make           String
+  model          String
+  year           Int
+  price          Float
+  vin            String?          @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  ServiceRequest ServiceRequest[]
+}
+
+model ServiceRequest {
+  id           String        @id @default(uuid())
+  caravanId    String
+  technicianId String?
+  status       ServiceStatus @default(PENDING)
+  description  String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  caravan      Caravan       @relation(fields: [caravanId], references: [id])
+  technician   User?         @relation(fields: [technicianId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  SALES
+  SERVICE_MANAGER
+  TECHNICIAN
+}
+
+enum LeadSource {
+  META
+  WEBSITE
+  REFERRAL
+  SHOW
+  OTHER
+}
+
+enum LeadStatus {
+  INQUIRY
+  DEMO
+  NEGOTIATION
+  WON
+  LOST
+}
+
+enum ActionChannel {
+  PHONE_CALL
+  EMAIL
+  SMS
+  WALK_IN
+  SOCIAL_MEDIA
+  OTHER
+}
+
+enum NextAction {
+  FOLLOW_UP_CALL
+  SEND_QUOTE
+  SCHEDULE_DEMO
+  SEND_EMAIL
+  SITE_VISIT
+  CLOSE_DEAL
+  NO_ACTION
+}
+
+enum ServiceStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
