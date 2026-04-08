@@ -4,7 +4,8 @@ import { prisma } from "./prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "fallback_secret_temporary_fix_" + Math.random().toString(36).slice(2),
+  debug: true,
   session: {
     strategy: "jwt",
   },
