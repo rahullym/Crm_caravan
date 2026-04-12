@@ -1,20 +1,31 @@
 import { prisma } from "@/lib/prisma"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import Link from "next/link"
 
 export default async function DashboardPage() {
+  const session = await getServerSession(authOptions)
+  const role = session?.user?.role
+  const userId = session?.user?.id
+
+  // SALES users only see stats for their assigned leads
+  const leadWhere = role === "SALES" ? { assignedToId: userId } : {}
+
   const [totalLeads, convertedLeads, activeDeals, pendingServices] = await Promise.all([
-    prisma.lead.count(),
-    prisma.lead.count({ where: { status: "WON" } }),
-    prisma.lead.count({ where: { status: { in: ["DEMO", "NEGOTIATION"] } } }),
+    prisma.lead.count({ where: leadWhere }),
+    prisma.lead.count({ where: { ...leadWhere, status: "WON" } }),
+    prisma.lead.count({ where: { ...leadWhere, status: { in: ["DEMO", "NEGOTIATION"] } } }),
     prisma.serviceRequest.count({ where: { status: "PENDING" } }),
   ])
 
   const recentLeads = await prisma.lead.findMany({
+    where: leadWhere,
     orderBy: { createdAt: "desc" },
     take: 5,
   })
 
   const recentFollowUps = await prisma.leadFollowUp.findMany({
+    where: role === "SALES" ? { lead: { assignedToId: userId } } : {},
     orderBy: { createdAt: "desc" },
     take: 5,
     include: {
@@ -40,7 +51,9 @@ export default async function DashboardPage() {
           <div className="topbar-avatar">
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e" }}>Welcome back</div>
-              <div style={{ fontSize: "11px", color: "#9CA3AF" }}>Here&apos;s what&apos;s happening</div>
+              <div style={{ fontSize: "11px", color: "#9CA3AF" }}>
+                {role === "SALES" ? "Showing your assigned leads" : "Here's what's happening"}
+              </div>
             </div>
           </div>
         </div>
@@ -50,7 +63,7 @@ export default async function DashboardPage() {
         {/* Stats Grid */}
         <div className="dashboard-stats-grid">
           <div className="stat-card">
-            <div className="stat-label">Total Leads</div>
+            <div className="stat-label">{role === "SALES" ? "My Leads" : "Total Leads"}</div>
             <div className="stat-value">{totalLeads}</div>
             <div className="stat-badge purple">{conversionRate}% conversion</div>
           </div>
@@ -77,7 +90,7 @@ export default async function DashboardPage() {
             {/* Recent Leads */}
             <div className="card">
               <div className="card-header">
-                <div className="card-title">Recent Leads</div>
+                <div className="card-title">{role === "SALES" ? "My Recent Leads" : "Recent Leads"}</div>
                 <Link href="/leads" style={{ fontSize: "13px", color: "var(--primary)", fontWeight: 600, textDecoration: "none" }}>
                   View all →
                 </Link>
@@ -94,7 +107,9 @@ export default async function DashboardPage() {
                 <tbody>
                   {recentLeads.length === 0 ? (
                     <tr>
-                      <td colSpan={4} style={{ textAlign: "center", color: "#9CA3AF", padding: "32px" }}>No leads yet</td>
+                      <td colSpan={4} style={{ textAlign: "center", color: "#9CA3AF", padding: "32px" }}>
+                        {role === "SALES" ? "No leads assigned to you yet." : "No leads yet"}
+                      </td>
                     </tr>
                   ) : recentLeads.map(lead => (
                     <tr key={lead.id}>
@@ -163,8 +178,8 @@ export default async function DashboardPage() {
                 </svg>
               </div>
               <div>
-                <div className="quick-link-title">Leads</div>
-                <div className="quick-link-sub">{totalLeads} total leads</div>
+                <div className="quick-link-title">{role === "SALES" ? "My Leads" : "Leads"}</div>
+                <div className="quick-link-sub">{totalLeads} {role === "SALES" ? "assigned" : "total"} leads</div>
               </div>
             </Link>
             <Link href="/pipeline" className="quick-link">

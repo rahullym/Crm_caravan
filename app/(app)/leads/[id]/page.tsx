@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 import Link from "next/link"
 import StatusSelect from "@/components/StatusSelect"
 import AddFollowUpForm from "@/components/AddFollowUpForm"
+import AssignLeadSelect from "@/components/AssignLeadSelect"
 
 export default async function LeadDetailsPage({
   params
@@ -11,9 +14,14 @@ export default async function LeadDetailsPage({
 }) {
   const { id } = await params
 
+  const session = await getServerSession(authOptions)
+  const role = session?.user?.role
+  const userId = session?.user?.id
+
   const lead = await prisma.lead.findUnique({
     where: { id },
     include: {
+      assignedTo: { select: { id: true, email: true } },
       followUps: {
         orderBy: { createdAt: "desc" },
         include: { author: { select: { email: true } } }
@@ -22,6 +30,19 @@ export default async function LeadDetailsPage({
   })
 
   if (!lead) notFound()
+
+  // SALES users can only view their assigned leads
+  if (role === "SALES" && lead.assignedToId !== userId) {
+    redirect("/leads")
+  }
+
+  const salesUsers = role === "ADMIN"
+    ? await prisma.user.findMany({
+        where: { role: "SALES" },
+        select: { id: true, email: true },
+        orderBy: { email: "asc" },
+      })
+    : []
 
   const formatEnum = (val: string | null | undefined) =>
     val ? val.replace(/_/g, " ") : "—"
@@ -50,7 +71,7 @@ export default async function LeadDetailsPage({
       <div className="topbar">
         <div className="topbar-title" style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Link href="/leads" style={{ color: "var(--text-muted)", textDecoration: "none", fontWeight: 600 }}>
-            Leads
+            {role === "SALES" ? "My Leads" : "Leads"}
           </Link>
           <span style={{ color: "var(--text-muted)" }}>/</span>
           <span>{lead.name}</span>
@@ -94,6 +115,38 @@ export default async function LeadDetailsPage({
 
           {/* ── COL 1: Lead Details ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+            {/* Assignment (Admin only) */}
+            {role === "ADMIN" && (
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Assigned Agent</div>
+                  {lead.assignedTo ? (
+                    <span className="stat-badge blue">{lead.assignedTo.email.split("@")[0]}</span>
+                  ) : (
+                    <span className="stat-badge orange">Unassigned</span>
+                  )}
+                </div>
+                <div style={{ padding: "16px 20px" }}>
+                  <div className="stat-label" style={{ marginBottom: 8 }}>Assign to</div>
+                  <AssignLeadSelect
+                    leadId={lead.id}
+                    currentAssignedId={lead.assignedToId}
+                    users={salesUsers}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Assigned to label (SALES view) */}
+            {role === "SALES" && lead.assignedTo && (
+              <div className="card">
+                <div className="card-header">
+                  <div className="card-title">Assigned To</div>
+                  <span className="stat-badge blue">You</span>
+                </div>
+              </div>
+            )}
 
             {/* Caravan Interest */}
             <div className="card">
@@ -218,7 +271,6 @@ export default async function LeadDetailsPage({
                           position: "relative"
                         }}
                       >
-                        {/* Header row */}
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                             {fu.channel && (
@@ -230,9 +282,7 @@ export default async function LeadDetailsPage({
                               </span>
                             )}
                             {fu.nextAction && (
-                              <span style={{
-                                fontSize: 11, fontWeight: 600, color: "var(--text-muted)"
-                              }}>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-muted)" }}>
                                 → {fu.nextAction.replace(/_/g, " ")}
                               </span>
                             )}
@@ -242,12 +292,10 @@ export default async function LeadDetailsPage({
                           </span>
                         </div>
 
-                        {/* Notes */}
                         <p style={{ fontSize: 13, color: "var(--text-main)", lineHeight: 1.6, margin: 0, whiteSpace: "pre-wrap" }}>
                           {fu.notes}
                         </p>
 
-                        {/* Footer: author + next action date */}
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8 }}>
                           <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
                             by {fu.author?.email ?? "Unknown"}

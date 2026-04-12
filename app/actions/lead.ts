@@ -43,8 +43,17 @@ export async function createLead(formData: FormData) {
       return { success: false, error: "A lead with this phone number already exists." }
     }
 
+    // SALES users: auto-assign the lead to themselves
+    const assignedToId =
+      session.user.role === "ADMIN"
+        ? (formData.get("assignedToId") as string | null) || null
+        : session.user.id
+
     const lead = await prisma.lead.create({
-      data: parsedData as Prisma.LeadCreateInput
+      data: {
+        ...(parsedData as Prisma.LeadCreateInput),
+        ...(assignedToId ? { assignedTo: { connect: { id: assignedToId } } } : {}),
+      }
     })
 
     revalidatePath("/leads")
@@ -65,6 +74,15 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
   if (!session?.user || !LEAD_ROLES.includes(session.user.role)) {
     return { success: false, error: "Unauthorized" }
   }
+
+  // SALES users can only update their assigned leads
+  if (session.user.role === "SALES") {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { assignedToId: true } })
+    if (!lead || lead.assignedToId !== session.user.id) {
+      return { success: false, error: "Unauthorized" }
+    }
+  }
+
   try {
     const parsedData = updateLeadStatusSchema.parse({ id: leadId, status: newStatus })
 
@@ -80,5 +98,50 @@ export async function updateLeadStatus(leadId: string, newStatus: string) {
       return { success: false, error: "Invalid status update" }
     }
     return { success: false, error: "Failed to update lead status" }
+  }
+}
+
+
+export async function assignLead(leadId: string, userId: string | null) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  try {
+    await prisma.lead.update({
+      where: { id: leadId },
+      data: { assignedToId: userId }
+    })
+
+    revalidatePath("/leads", "layout")
+    revalidatePath(`/leads/${leadId}`)
+    return { success: true }
+  } catch {
+    return { success: false, error: "Failed to assign lead." }
+  }
+}
+
+
+export async function bulkAssignLeads(leadIds: string[], userId: string | null) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  if (leadIds.length === 0) {
+    return { success: false, error: "No leads selected." }
+  }
+
+  try {
+    await prisma.lead.updateMany({
+      where: { id: { in: leadIds } },
+      data: { assignedToId: userId }
+    })
+
+    revalidatePath("/leads", "layout")
+    return { success: true, count: leadIds.length }
+  } catch {
+    return { success: false, error: "Failed to bulk assign leads." }
   }
 }

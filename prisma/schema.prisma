@@ -15,6 +15,7 @@ model User {
   updatedAt       DateTime         @updatedAt
   serviceRequests ServiceRequest[]
   followUps       LeadFollowUp[]
+  assignedLeads   Lead[]           @relation("AssignedLeads")
 }
 
 model Lead {
@@ -33,6 +34,8 @@ model Lead {
   nextActionDate   DateTime?
   customerNotes    String?
   internalNotes    String?
+  assignedToId     String?
+  assignedTo       User?          @relation("AssignedLeads", fields: [assignedToId], references: [id])
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   followUps        LeadFollowUp[]
