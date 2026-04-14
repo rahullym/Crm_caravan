@@ -6,6 +6,8 @@ import Link from "next/link"
 import StatusSelect from "@/components/StatusSelect"
 import AddFollowUpForm from "@/components/AddFollowUpForm"
 import AssignLeadSelect from "@/components/AssignLeadSelect"
+import EditLeadModal from "@/components/EditLeadModal"
+import DeleteLeadButton from "@/components/DeleteLeadButton"
 
 export default async function LeadDetailsPage({
   params
@@ -78,6 +80,8 @@ export default async function LeadDetailsPage({
         </div>
         <div className="topbar-right">
           <StatusSelect leadId={lead.id} currentStatus={lead.status} />
+          <EditLeadModal lead={lead} />
+          {role === "ADMIN" && <DeleteLeadButton leadId={lead.id} leadName={lead.name} redirectAfter />}
         </div>
       </div>
 

@@ -12,7 +12,7 @@ export const createLeadSchema = z.object({
   email: z.string().email("Invalid email").optional().or(z.literal("")).transform(v => v || undefined),
   state: z.enum(AUS_STATES).optional().or(z.literal("")).transform(v => v || undefined),
   source: z.nativeEnum(LeadSource).optional().default("OTHER"),
-  status: z.nativeEnum(LeadStatus).optional().default("INQUIRY"),
+  status: z.nativeEnum(LeadStatus).optional().default("NEW_LEAD"),
   modelInterest: z.string().optional().or(z.literal("")).transform(v => v || undefined),
   size: z.string().optional().or(z.literal("")).transform(v => v || undefined),
   actionChannel: ActionChannelEnum.optional().or(z.literal("")).transform(v => v || undefined),
@@ -24,6 +24,12 @@ export const createLeadSchema = z.object({
 })
 
 export type CreateLeadInput = z.infer<typeof createLeadSchema>
+
+export const updateLeadSchema = createLeadSchema.partial().extend({
+  id: z.string().uuid("Invalid lead ID"),
+})
+
+export type UpdateLeadInput = z.infer<typeof updateLeadSchema>
 
 export const updateLeadStatusSchema = z.object({
   id: z.string().uuid("Invalid lead ID"),

@@ -25,7 +25,7 @@ model Lead {
   email            String?
   state            String?
   source           LeadSource     @default(OTHER)
-  status           LeadStatus     @default(INQUIRY)
+  status           LeadStatus     @default(NEW_LEAD)
   modelInterest    String?
   size             String?
   actionChannel    ActionChannel?
@@ -78,6 +78,12 @@ model ServiceRequest {
   technician   User?         @relation(fields: [technicianId], references: [id])
 }
 
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
 enum Role {
   ADMIN
   SALES
@@ -94,10 +100,16 @@ enum LeadSource {
 }
 
 enum LeadStatus {
-  INQUIRY
-  DEMO
-  NEGOTIATION
-  WON
+  NEW_LEAD
+  CONTACTED
+  ENGAGED
+  QUALIFIED
+  OPTIONS_SENT
+  SHORTLISTED
+  HOT_LEAD
+  QUOTE_SENT
+  DECISION_PENDING
+  DEPOSIT_PAID
   LOST
 }
 

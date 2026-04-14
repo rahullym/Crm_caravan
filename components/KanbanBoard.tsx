@@ -2,15 +2,16 @@
 
 import { useState, useTransition } from "react"
 import { Lead, LeadStatus } from "@prisma/client"
+import Link from "next/link"
 import { updateLeadStatus } from "@/app/actions/lead"
+import { LEAD_STATUSES, getStatusMeta } from "@/lib/lead-statuses"
 
-const COLUMNS = [
-  { id: LeadStatus.INQUIRY, label: "Inquiry", color: "#6B7280" },
-  { id: LeadStatus.DEMO, label: "Demo", color: "#2563EB" },
-  { id: LeadStatus.NEGOTIATION, label: "Negotiation", color: "#EA580C" },
-  { id: LeadStatus.WON, label: "Won", color: "#059669" },
-  { id: LeadStatus.LOST, label: "Lost", color: "#DC2626" },
-]
+const COLUMNS = LEAD_STATUSES.map(s => ({
+  id: s.value as LeadStatus,
+  label: s.label,
+  color: s.color,
+  bg: s.bg,
+}))
 
 export default function KanbanBoard({ initialLeads }: { initialLeads: Lead[] }) {
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
@@ -45,7 +46,7 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: Lead[] }) 
           Syncing...
         </div>
       )}
-      <div style={{ display: "flex", gap: "16px", overflowX: "auto", paddingBottom: "16px" }}>
+      <div style={{ display: "flex", gap: "14px", overflowX: "auto", paddingBottom: "16px" }}>
         {COLUMNS.map((col) => {
           const colLeads = leads.filter((l) => l.status === col.id)
           return (
@@ -54,11 +55,12 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: Lead[] }) 
               className="kanban-column"
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, col.id)}
+              style={{ minWidth: 190 }}
             >
               <div className="kanban-column-header">
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.color }} />
-                  <span className="kanban-column-title">{col.label}</span>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: col.color, flexShrink: 0 }} />
+                  <span className="kanban-column-title" style={{ fontSize: 12 }}>{col.label}</span>
                 </div>
                 <span className="kanban-count">{colLeads.length}</span>
               </div>
@@ -70,10 +72,16 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: Lead[] }) 
                     onDragStart={(e) => handleDragStart(e, lead.id)}
                     className="kanban-card"
                   >
-                    <div className="kanban-card-name">{lead.name}</div>
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      style={{ textDecoration: "none", display: "block" }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      <div className="kanban-card-name">{lead.name}</div>
+                    </Link>
                     <div className="kanban-card-phone">{lead.phone}</div>
                     <span className={`badge badge-${lead.source.toLowerCase()}`} style={{ fontSize: "11px" }}>
-                      {lead.source}
+                      {lead.source.replace(/_/g, " ")}
                     </span>
                   </div>
                 ))}

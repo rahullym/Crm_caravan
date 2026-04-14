@@ -13,8 +13,8 @@ export default async function DashboardPage() {
 
   const [totalLeads, convertedLeads, activeDeals, pendingServices] = await Promise.all([
     prisma.lead.count({ where: leadWhere }),
-    prisma.lead.count({ where: { ...leadWhere, status: "WON" } }),
-    prisma.lead.count({ where: { ...leadWhere, status: { in: ["DEMO", "NEGOTIATION"] } } }),
+    prisma.lead.count({ where: { ...leadWhere, status: "DEPOSIT_PAID" } }),
+    prisma.lead.count({ where: { ...leadWhere, status: { in: ["HOT_LEAD", "QUOTE_SENT", "DECISION_PENDING"] } } }),
     prisma.serviceRequest.count({ where: { status: "PENDING" } }),
   ])
 
