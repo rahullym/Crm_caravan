@@ -23,6 +23,16 @@ export async function createServiceRequest(formData: FormData) {
 
     const data = createServiceRequestSchema.parse(rawData)
 
+    if (data.technicianId) {
+      const tech = await prisma.user.findUnique({
+        where: { id: data.technicianId },
+        select: { role: true },
+      })
+      if (!tech || tech.role !== "TECHNICIAN") {
+        return { success: false, error: "Selected technician is invalid." }
+      }
+    }
+
     const service = await prisma.serviceRequest.create({
       data: {
         caravanId: data.caravanId,
@@ -68,6 +78,16 @@ export async function assignTechnician(id: string, technicianId: string | null) 
   }
   try {
     const data = assignTechnicianSchema.parse({ id, technicianId })
+
+    if (data.technicianId) {
+      const tech = await prisma.user.findUnique({
+        where: { id: data.technicianId },
+        select: { role: true },
+      })
+      if (!tech || tech.role !== "TECHNICIAN") {
+        return { success: false, error: "Selected technician is invalid." }
+      }
+    }
 
     const updated = await prisma.serviceRequest.update({
       where: { id: data.id },

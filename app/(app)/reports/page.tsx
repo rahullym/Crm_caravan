@@ -1,8 +1,20 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { LEAD_STATUSES, getStatusMeta } from "@/lib/lead-statuses"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import type { Prisma } from "@prisma/client"
 
 export default async function ReportsPage() {
+  const session = await getServerSession(authOptions)
+  const role = session?.user?.role
+  const userId = session?.user?.id
+
+  // SALES users only see reports for leads assigned to them.
+  const leadWhere: Prisma.LeadWhereInput = role === "SALES" ? { assignedToId: userId } : {}
+  const followUpWhere: Prisma.LeadFollowUpWhereInput =
+    role === "SALES" ? { lead: { assignedToId: userId } } : {}
+
   const [
     totalLeads,
     wonLeads,
@@ -15,22 +27,23 @@ export default async function ReportsPage() {
     leadsThisMonth,
     leadsLastMonth,
   ] = await Promise.all([
-    prisma.lead.count(),
-    prisma.lead.count({ where: { status: "DEPOSIT_PAID" } }),
-    prisma.lead.count({ where: { status: "LOST" } }),
-    prisma.lead.groupBy({ by: ["status"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
-    prisma.lead.groupBy({ by: ["source"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
-    prisma.leadFollowUp.count(),
-    prisma.leadFollowUp.groupBy({ by: ["channel"], _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+    prisma.lead.count({ where: leadWhere }),
+    prisma.lead.count({ where: { ...leadWhere, status: "DEPOSIT_PAID" } }),
+    prisma.lead.count({ where: { ...leadWhere, status: "LOST" } }),
+    prisma.lead.groupBy({ by: ["status"], where: leadWhere, _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+    prisma.lead.groupBy({ by: ["source"], where: leadWhere, _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
+    prisma.leadFollowUp.count({ where: followUpWhere }),
+    prisma.leadFollowUp.groupBy({ by: ["channel"], where: followUpWhere, _count: { id: true }, orderBy: { _count: { id: "desc" } } }),
     prisma.lead.findMany({
-      where: { status: "DEPOSIT_PAID" },
+      where: { ...leadWhere, status: "DEPOSIT_PAID" },
       orderBy: { updatedAt: "desc" },
       take: 5,
       select: { id: true, name: true, modelInterest: true, updatedAt: true },
     }),
-    prisma.lead.count({ where: { createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } }),
+    prisma.lead.count({ where: { ...leadWhere, createdAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } } }),
     prisma.lead.count({
       where: {
+        ...leadWhere,
         createdAt: {
           gte: new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
           lt: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -68,9 +81,11 @@ export default async function ReportsPage() {
           </span>
           <span style={{
             fontSize: 11, fontWeight: 700, padding: "3px 10px",
-            background: "#DBEAFE", color: "#1E40AF", borderRadius: 100,
+            background: role === "SALES" ? "#FEF3C7" : "#DBEAFE",
+            color: role === "SALES" ? "#92400E" : "#1E40AF",
+            borderRadius: 100,
           }}>
-            All Leads — Total View
+            {role === "SALES" ? "My Leads — Assigned View" : "All Leads — Total View"}
           </span>
         </div>
       </div>

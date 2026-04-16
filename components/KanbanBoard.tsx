@@ -46,7 +46,16 @@ export default function KanbanBoard({ initialLeads }: { initialLeads: Lead[] }) 
           Syncing...
         </div>
       )}
-      <div style={{ display: "flex", gap: "14px", overflowX: "auto", paddingBottom: "16px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "14px",
+          overflowX: "auto",
+          paddingBottom: "16px",
+          height: "calc(100vh - 130px)",
+          alignItems: "stretch",
+        }}
+      >
         {COLUMNS.map((col) => {
           const colLeads = leads.filter((l) => l.status === col.id)
           return (

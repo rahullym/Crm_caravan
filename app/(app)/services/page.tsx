@@ -2,11 +2,23 @@ import { prisma } from "@/lib/prisma"
 import ServiceForm from "@/components/ServiceForm"
 import ServiceStatusSelect from "@/components/ServiceStatusSelect"
 import TechnicianSelect from "@/components/TechnicianSelect"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
+
+const SERVICE_PAGE_ROLES = ["ADMIN", "SERVICE_MANAGER", "TECHNICIAN"]
 
 export default async function ServicesPage() {
+  const session = await getServerSession(authOptions)
+  const role = session?.user?.role
+  if (!role || !SERVICE_PAGE_ROLES.includes(role)) redirect("/dashboard")
+
+  const technicianId = session!.user!.id
+
   const caravans = await prisma.caravan.findMany({ select: { id: true, make: true, model: true, vin: true } })
   const technicians = await prisma.user.findMany({ where: { role: "TECHNICIAN" }, select: { id: true, email: true } })
   const services = await prisma.serviceRequest.findMany({
+    where: role === "TECHNICIAN" ? { technicianId } : {},
     include: { caravan: true, technician: { select: { email: true } } },
     orderBy: { createdAt: "desc" }
   })

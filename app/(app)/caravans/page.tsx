@@ -1,8 +1,14 @@
 import { prisma } from "@/lib/prisma"
 import CaravanForm from "@/components/CaravanForm"
 import DeleteCaravanButton from "@/components/DeleteCaravanButton"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 export default async function CaravansPage() {
+  const session = await getServerSession(authOptions)
+  if (session?.user?.role !== "ADMIN") redirect("/dashboard")
+
   const caravans = await prisma.caravan.findMany({ orderBy: { createdAt: "desc" } })
 
   return (

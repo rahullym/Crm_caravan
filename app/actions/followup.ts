@@ -6,9 +6,20 @@ import { revalidatePath } from "next/cache"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 
+const FOLLOWUP_ROLES = ["ADMIN", "SALES"]
+
 export async function addFollowUp(leadId: string, formData: FormData) {
   const session = await getServerSession(authOptions)
-  if (!session?.user) return { success: false, error: "Unauthorized" }
+  if (!session?.user || !FOLLOWUP_ROLES.includes(session.user.role)) {
+    return { success: false, error: "Unauthorized" }
+  }
+
+  if (session.user.role === "SALES") {
+    const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { assignedToId: true } })
+    if (!lead || lead.assignedToId !== session.user.id) {
+      return { success: false, error: "You can only log follow-ups on leads assigned to you." }
+    }
+  }
 
   const notes = formData.get("notes") as string
   if (!notes?.trim()) return { success: false, error: "Notes are required" }

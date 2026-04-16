@@ -77,7 +77,7 @@ export async function bulkUploadLeads(formData: FormData) {
         email: row["email"] || row["email_address"],
         state: (row["state"] || "").toUpperCase(),
         source: (row["source"] || row["lead_source"] || "OTHER").toUpperCase().replace(/\s+/g, "_"),
-        status: (row["status"] || "INQUIRY").toUpperCase(),
+        status: (row["status"] || "NEW_LEAD").toUpperCase().replace(/\s+/g, "_"),
         modelInterest: row["model_interest"] || row["model"] || row["caravan_model"],
         size: row["size"] || row["caravan_size"],
         customerNotes: row["notes"] || row["customer_notes"],
