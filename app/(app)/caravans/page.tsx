@@ -23,6 +23,7 @@ export default async function CaravansPage() {
           <div className="card-header">
             <div className="card-title">Caravan Inventory</div>
           </div>
+          <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
@@ -49,6 +50,7 @@ export default async function CaravansPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </>

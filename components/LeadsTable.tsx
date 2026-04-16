@@ -197,6 +197,7 @@ export default function LeadsTable({
         </div>
       )}
 
+      <div className="table-scroll">
       <table className="data-table">
         <thead>
           <tr>
@@ -283,6 +284,7 @@ export default function LeadsTable({
           })}
         </tbody>
       </table>
+      </div>
     </>
   )
 }

@@ -95,6 +95,7 @@ export default async function DashboardPage() {
                   View all →
                 </Link>
               </div>
+              <div className="table-scroll">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -129,6 +130,7 @@ export default async function DashboardPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
 
             {/* Recent Follow-Ups */}

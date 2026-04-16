@@ -35,6 +35,7 @@ export default async function ServicesPage() {
           <div className="card-header">
             <div className="card-title">Service Requests</div>
           </div>
+          <div className="table-scroll">
           <table className="data-table">
             <thead>
               <tr>
@@ -69,6 +70,7 @@ export default async function ServicesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
     </>

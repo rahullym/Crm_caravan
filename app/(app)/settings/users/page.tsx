@@ -37,6 +37,7 @@ export default async function UserManagementPage() {
               <div className="card-title">System Users</div>
               <span style={{ fontSize: "13px", color: "#9CA3AF" }}>{users.length} records</span>
             </div>
+            <div className="table-scroll">
             <table className="data-table">
               <thead>
                 <tr>
@@ -90,6 +91,7 @@ export default async function UserManagementPage() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Add User Form */}
