@@ -32,7 +32,7 @@ type Lead = {
 
 type User = { id: string; email: string }
 
-type SortKey = "name" | "model" | "source" | "status" | "assignedTo"
+type SortKey = "name" | "model" | "source" | "status" | "nextActionDate" | "createdAt" | "assignedTo"
 type SortDir = "asc" | "desc"
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -78,6 +78,14 @@ export default function LeadsTable({
         case "source":     av = a.source; bv = b.source; break
         case "status":     av = a.status; bv = b.status; break
         case "assignedTo": av = a.assignedTo?.email ?? ""; bv = b.assignedTo?.email ?? ""; break
+        case "nextActionDate":
+          av = a.nextActionDate ? new Date(a.nextActionDate).getTime() : 0
+          bv = b.nextActionDate ? new Date(b.nextActionDate).getTime() : 0
+          break
+        case "createdAt":
+          av = new Date(a.createdAt).getTime()
+          bv = new Date(b.createdAt).getTime()
+          break
       }
 
       if (av === null || av === "") av = sortDir === "asc" ? "\uFFFF" : ""
@@ -133,7 +141,16 @@ export default function LeadsTable({
     )
   }
 
-  const colSpan = isAdmin ? 7 : 5
+  const colSpan = isAdmin ? 9 : 7
+
+  function formatDate(d: Date | null) {
+    if (!d) return null
+    return new Date(d).toLocaleDateString("en-AU", { day: "2-digit", month: "short" })
+  }
+  function isOverdue(d: Date | null) {
+    if (!d) return false
+    return new Date(d).getTime() < Date.now() - 24 * 60 * 60 * 1000
+  }
 
   // Stable colour from name → avatar background
   const AVATAR_COLORS = ["#5B5FED", "#0891B2", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777", "#475569"]
@@ -214,6 +231,8 @@ export default function LeadsTable({
             {thProps("model", "Model")}
             {thProps("source", "Source")}
             {thProps("status", "Status")}
+            {thProps("nextActionDate", "Next Action")}
+            {thProps("createdAt", "Added")}
             {isAdmin && thProps("assignedTo", "Owner")}
             <th style={{ width: 90 }}>Actions</th>
           </tr>
@@ -278,6 +297,33 @@ export default function LeadsTable({
                 <td><span className={`badge badge-${lead.source.toLowerCase()}`}>{lead.source.replace(/_/g, " ")}</span></td>
                 <td>
                   <StatusSelect leadId={lead.id} currentStatus={lead.status as import("@prisma/client").LeadStatus} />
+                </td>
+                <td>
+                  {lead.nextAction || lead.nextActionDate ? (
+                    <div>
+                      {lead.nextAction && (
+                        <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-main)" }}>
+                          {lead.nextAction.replace(/_/g, " ")}
+                        </div>
+                      )}
+                      {lead.nextActionDate && (
+                        <div style={{
+                          fontSize: 11,
+                          fontWeight: 700,
+                          color: isOverdue(lead.nextActionDate) ? "#DC2626" : "var(--primary)",
+                          marginTop: 2,
+                          fontVariantNumeric: "tabular-nums",
+                        }}>
+                          {isOverdue(lead.nextActionDate) ? "⚠ " : ""}{formatDate(lead.nextActionDate)}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <span style={{ color: "#CBD5E1", fontSize: 13 }}>—</span>
+                  )}
+                </td>
+                <td style={{ fontSize: 12, color: "var(--text-muted)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                  {formatDate(lead.createdAt)}
                 </td>
                 {isAdmin && (
                   <td>
