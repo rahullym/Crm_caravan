@@ -27,7 +27,7 @@ export default function AssignLeadSelect({
         })
       }}
       className="inline-select"
-      style={{ minWidth: 160 }}
+      style={{ minWidth: 110, maxWidth: 140 }}
     >
       <option value="">Unassigned</option>
       {users.map((u) => (

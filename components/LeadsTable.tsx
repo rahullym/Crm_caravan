@@ -32,7 +32,7 @@ type Lead = {
 
 type User = { id: string; email: string }
 
-type SortKey = "name" | "state" | "source" | "status" | "assignedTo" | "nextActionDate" | "createdAt"
+type SortKey = "name" | "model" | "source" | "status" | "assignedTo"
 type SortDir = "asc" | "desc"
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -73,19 +73,11 @@ export default function LeadsTable({
       let bv: string | number | null = null
 
       switch (sortKey) {
-        case "name":          av = a.name; bv = b.name; break
-        case "state":         av = a.state ?? ""; bv = b.state ?? ""; break
-        case "source":        av = a.source; bv = b.source; break
-        case "status":        av = a.status; bv = b.status; break
-        case "assignedTo":    av = a.assignedTo?.email ?? ""; bv = b.assignedTo?.email ?? ""; break
-        case "nextActionDate":
-          av = a.nextActionDate ? new Date(a.nextActionDate).getTime() : 0
-          bv = b.nextActionDate ? new Date(b.nextActionDate).getTime() : 0
-          break
-        case "createdAt":
-          av = new Date(a.createdAt).getTime()
-          bv = new Date(b.createdAt).getTime()
-          break
+        case "name":       av = a.name; bv = b.name; break
+        case "model":      av = a.modelInterest ?? ""; bv = b.modelInterest ?? ""; break
+        case "source":     av = a.source; bv = b.source; break
+        case "status":     av = a.status; bv = b.status; break
+        case "assignedTo": av = a.assignedTo?.email ?? ""; bv = b.assignedTo?.email ?? ""; break
       }
 
       if (av === null || av === "") av = sortDir === "asc" ? "\uFFFF" : ""
@@ -141,7 +133,19 @@ export default function LeadsTable({
     )
   }
 
-  const colSpan = isAdmin ? 11 : 9
+  const colSpan = isAdmin ? 7 : 5
+
+  // Stable colour from name → avatar background
+  const AVATAR_COLORS = ["#5B5FED", "#0891B2", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777", "#475569"]
+  function avatarColor(name: string) {
+    let hash = 0
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+  }
+  function initials(name: string) {
+    const parts = name.trim().split(/\s+/)
+    return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?"
+  }
 
   return (
     <>
@@ -198,7 +202,7 @@ export default function LeadsTable({
       )}
 
       <div className="table-scroll">
-      <table className="data-table">
+      <table className="data-table data-table--compact">
         <thead>
           <tr>
             {isAdmin && (
@@ -206,27 +210,32 @@ export default function LeadsTable({
                 <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ cursor: "pointer" }} />
               </th>
             )}
-            {thProps("name", "Name")}
-            <th>Contact</th>
-            {thProps("state", "State")}
-            <th>Model Interest</th>
+            {thProps("name", "Lead")}
+            {thProps("model", "Model")}
             {thProps("source", "Source")}
             {thProps("status", "Status")}
-            {isAdmin && thProps("assignedTo", "Assigned To")}
-            {thProps("nextActionDate", "Next Action")}
-            {thProps("createdAt", "Added")}
-            <th style={{ width: 120 }}>Actions</th>
+            {isAdmin && thProps("assignedTo", "Owner")}
+            <th style={{ width: 90 }}>Actions</th>
           </tr>
         </thead>
         <tbody>
           {sortedLeads.length === 0 ? (
             <tr>
-              <td colSpan={colSpan} style={{ textAlign: "center", color: "#9CA3AF", padding: "40px" }}>
-                {isAdmin ? "No leads yet. Click + Add Lead to get started." : "No leads assigned to you yet."}
+              <td colSpan={colSpan}>
+                <div className="empty-state">
+                  <div className="empty-state-icon">📋</div>
+                  <div className="empty-state-text">
+                    {isAdmin ? "No leads yet" : "No leads assigned to you yet"}
+                  </div>
+                  <div className="empty-state-hint">
+                    {isAdmin ? "Click + Add Lead in the top-right to get started." : "Ask an admin to assign you some leads."}
+                  </div>
+                </div>
               </td>
             </tr>
           ) : sortedLeads.map(lead => {
-            const status = getStatusMeta(lead.status)
+            const ownerInitial = lead.assignedTo?.email?.[0]?.toUpperCase() ?? ""
+            const ownerName = lead.assignedTo?.email?.split("@")[0] ?? "Unassigned"
             return (
               <tr key={lead.id} style={{ background: selected.has(lead.id) ? "var(--primary-light)" : undefined }}>
                 {isAdmin && (
@@ -239,43 +248,56 @@ export default function LeadsTable({
                     />
                   </td>
                 )}
-                <td style={{ fontWeight: 600 }}>
-                  <Link href={`/leads/${lead.id}`} style={{ color: "var(--primary)", textDecoration: "none" }}>
-                    {lead.name}
-                  </Link>
+                <td>
+                  <div className="lead-cell">
+                    <div className="lead-avatar" style={{ background: avatarColor(lead.name) }}>
+                      {initials(lead.name)}
+                    </div>
+                    <div className="lead-cell-text">
+                      <Link href={`/leads/${lead.id}`} className="lead-cell-name">{lead.name}</Link>
+                      <div className="lead-cell-phone">{lead.phone}</div>
+                      {(lead.state || lead.email) && (
+                        <div className="lead-meta-row">
+                          {lead.state && <span className="meta-chip">{lead.state}</span>}
+                          {lead.email && <span className="meta-chip" title={lead.email}>✉</span>}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </td>
                 <td>
-                  <div style={{ fontWeight: 500 }}>{lead.phone}</div>
-                  <div style={{ fontSize: "12px", color: "#9CA3AF" }}>{lead.email || "—"}</div>
+                  {lead.modelInterest ? (
+                    <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-main)" }}>
+                      {lead.modelInterest}
+                      {lead.size && <div style={{ fontSize: 11, color: "var(--text-muted)", fontWeight: 500, marginTop: 2 }}>{lead.size}</div>}
+                    </div>
+                  ) : (
+                    <span style={{ color: "#CBD5E1", fontSize: 13 }}>—</span>
+                  )}
                 </td>
-                <td style={{ color: "#6B7280", fontSize: "13px" }}>{lead.state || "—"}</td>
-                <td style={{ color: "#6B7280", fontSize: "13px" }}>{lead.modelInterest || "—"}</td>
                 <td><span className={`badge badge-${lead.source.toLowerCase()}`}>{lead.source.replace(/_/g, " ")}</span></td>
                 <td>
                   <StatusSelect leadId={lead.id} currentStatus={lead.status as import("@prisma/client").LeadStatus} />
                 </td>
                 {isAdmin && (
                   <td>
-                    <AssignLeadSelect
-                      leadId={lead.id}
-                      currentAssignedId={lead.assignedToId}
-                      users={salesUsers}
-                    />
+                    <div className="owner-cell">
+                      <div className={`owner-avatar${lead.assignedTo ? "" : " owner-avatar--empty"}`}>
+                        {ownerInitial || "—"}
+                      </div>
+                      <AssignLeadSelect
+                        leadId={lead.id}
+                        currentAssignedId={lead.assignedToId}
+                        users={salesUsers}
+                      />
+                    </div>
                   </td>
                 )}
-                <td style={{ color: "#9CA3AF", fontSize: "13px" }}>
-                  {lead.nextActionDate
-                    ? new Date(lead.nextActionDate).toLocaleDateString("en-AU", { day: "2-digit", month: "short", year: "numeric" })
-                    : "—"}
-                </td>
-                <td style={{ color: "#9CA3AF", fontSize: "13px" }}>
-                  {new Date(lead.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
-                </td>
                 <td>
-                  <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                    <EditLeadModal lead={lead} />
+                  <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                    <EditLeadModal lead={lead} iconOnly />
                     {(isAdmin || (currentUserId && lead.assignedToId === currentUserId)) && (
-                      <DeleteLeadButton leadId={lead.id} leadName={lead.name} />
+                      <DeleteLeadButton leadId={lead.id} leadName={lead.name} iconOnly />
                     )}
                   </div>
                 </td>
