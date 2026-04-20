@@ -65,7 +65,9 @@ export default async function ReportsPage() {
 
   const channelColors: Record<string, string> = {
     PHONE_CALL: "#3B82F6", SMS: "#10B981", EMAIL: "#6366F1",
-    WALK_IN: "#F59E0B", SOCIAL_MEDIA: "#8B5CF6", OTHER: "#94A3B8",
+    WALK_IN: "#F59E0B", SOCIAL_MEDIA: "#8B5CF6",
+    META_PAID: "#1877F2", META_ORGANIC: "#60A5FA",
+    OTHER: "#94A3B8",
   }
 
   const maxStatusCount = Math.max(...leadsByStatus.map(s => s._count.id), 1)

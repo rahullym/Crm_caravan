@@ -30,11 +30,11 @@ export default function CaravanForm() {
         {success && <div className="alert alert-success">{success}</div>}
         <div className="form-group">
           <label className="form-label" htmlFor="make">Make *</label>
-          <input id="make" name="make" type="text" required className="form-input" placeholder="Jayco" />
+          <input id="make" name="make" type="text" required className="form-input" placeholder="Make" />
         </div>
         <div className="form-group">
           <label className="form-label" htmlFor="model">Model *</label>
-          <input id="model" name="model" type="text" required className="form-input" placeholder="Expanda" />
+          <input id="model" name="model" type="text" required className="form-input" placeholder="Rover / Drifter / Elite / Toy Haulers" />
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
           <div className="form-group">

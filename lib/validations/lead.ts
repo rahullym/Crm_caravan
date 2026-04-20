@@ -3,7 +3,7 @@ import { LeadSource, LeadStatus } from "@prisma/client"
 
 const AUS_STATES = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"] as const
 
-const ActionChannelEnum = z.enum(["PHONE_CALL", "EMAIL", "SMS", "WALK_IN", "SOCIAL_MEDIA", "OTHER"])
+const ActionChannelEnum = z.enum(["PHONE_CALL", "EMAIL", "SMS", "WALK_IN", "SOCIAL_MEDIA", "META_PAID", "META_ORGANIC", "OTHER"])
 const NextActionEnum = z.enum(["FOLLOW_UP_CALL", "SEND_QUOTE", "SCHEDULE_DEMO", "SEND_EMAIL", "SITE_VISIT", "CLOSE_DEAL", "NO_ACTION"])
 
 export const createLeadSchema = z.object({

@@ -9,6 +9,8 @@ const ACTION_CHANNELS = [
   { value: "SMS", label: "SMS" },
   { value: "WALK_IN", label: "Walk In" },
   { value: "SOCIAL_MEDIA", label: "Social Media" },
+  { value: "META_PAID", label: "Meta Paid" },
+  { value: "META_ORGANIC", label: "Meta Organic" },
   { value: "OTHER", label: "Other" },
 ]
 

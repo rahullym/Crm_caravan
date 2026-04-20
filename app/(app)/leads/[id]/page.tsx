@@ -64,6 +64,8 @@ export default async function LeadDetailsPage({
     SMS:          { bg: "#F0FDF4", color: "#15803D" },
     WALK_IN:      { bg: "#FDF4FF", color: "#7E22CE" },
     SOCIAL_MEDIA: { bg: "#FFEDD5", color: "#C2410C" },
+    META_PAID:    { bg: "#E0E7FF", color: "#1877F2" },
+    META_ORGANIC: { bg: "#EFF6FF", color: "#2563EB" },
     OTHER:        { bg: "#F1F5F9", color: "#475569" },
   }
 

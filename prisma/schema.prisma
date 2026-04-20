@@ -119,6 +119,8 @@ enum ActionChannel {
   SMS
   WALK_IN
   SOCIAL_MEDIA
+  META_PAID
+  META_ORGANIC
   OTHER
 }
 

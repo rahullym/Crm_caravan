@@ -6,17 +6,10 @@ import { createLead, updateLead } from "@/app/actions/lead"
 const AUS_STATES = ["ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"]
 
 const CARAVAN_MODELS = [
-  "Goldstream GRC",
-  "Goldstream Storm",
-  "Lotus Freelander",
-  "Lotus Trooper",
-  "Jayco Journey",
-  "Jayco Expanda",
-  "Coromal Element",
-  "Coromal Pioneer",
-  "New Age Manta Ray",
-  "New Age Ocean Breeze",
-  "Other",
+  "Rover",
+  "Drifter",
+  "Elite",
+  "Toy Haulers",
 ]
 
 const ACTION_CHANNELS = [
@@ -25,6 +18,8 @@ const ACTION_CHANNELS = [
   { value: "SMS",          label: "SMS" },
   { value: "WALK_IN",      label: "Walk In" },
   { value: "SOCIAL_MEDIA", label: "Social Media" },
+  { value: "META_PAID",    label: "Meta Paid" },
+  { value: "META_ORGANIC", label: "Meta Organic" },
   { value: "OTHER",        label: "Other" },
 ]
 
