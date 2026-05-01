@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import AddUserForm from "@/components/AddUserForm"
+import EditUserModal from "@/components/EditUserModal"
+import DeleteUserButton from "@/components/DeleteUserButton"
 
 export default async function UserManagementPage() {
   const session = await getServerSession(authOptions)
@@ -44,12 +46,13 @@ export default async function UserManagementPage() {
                   <th>User</th>
                   <th>Role</th>
                   <th>Joined</th>
+                  <th style={{ width: 90 }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {users.length === 0 ? (
                   <tr>
-                    <td colSpan={3} style={{ textAlign: "center", color: "#9CA3AF", padding: "40px" }}>
+                    <td colSpan={4} style={{ textAlign: "center", color: "#9CA3AF", padding: "40px" }}>
                       No users yet.
                     </td>
                   </tr>
@@ -85,6 +88,12 @@ export default async function UserManagementPage() {
                         {new Date(u.createdAt).toLocaleDateString("en-AU", {
                           day: "numeric", month: "short", year: "numeric"
                         })}
+                      </td>
+                      <td>
+                        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                          <EditUserModal user={u} isYou={isYou} />
+                          <DeleteUserButton userId={u.id} userEmail={u.email} disabled={isYou} />
+                        </div>
                       </td>
                     </tr>
                   )
