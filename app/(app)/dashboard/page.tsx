@@ -2,6 +2,18 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import Link from "next/link"
+import { getStatusMeta } from "@/lib/lead-statuses"
+
+const AVATAR_COLORS = ["#5B5FED", "#0891B2", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777", "#475569"]
+function avatarColor(name: string) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) | 0
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]
+}
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/)
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase() || "?"
+}
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions)
@@ -47,7 +59,7 @@ export default async function DashboardPage() {
       {/* Topbar */}
       <div className="topbar">
         <div className="topbar-title">Dashboard</div>
-        <div className="topbar-right">
+        <div className="topbar-right hide-on-mobile">
           <div className="topbar-avatar">
             <div style={{ textAlign: "right" }}>
               <div style={{ fontSize: "13px", fontWeight: 600, color: "#1a1a2e" }}>Welcome back</div>
@@ -95,7 +107,7 @@ export default async function DashboardPage() {
                   View all →
                 </Link>
               </div>
-              <div className="table-scroll">
+              <div className="table-scroll leads-table-wrap">
               <table className="data-table">
                 <thead>
                   <tr>
@@ -130,6 +142,44 @@ export default async function DashboardPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
+
+              {/* Mobile list — shown <700px */}
+              <div className="leads-card-list">
+                {recentLeads.length === 0 ? (
+                  <div style={{ padding: "28px 14px", textAlign: "center", color: "#94A3B8", fontSize: 13 }}>
+                    {role === "SALES" ? "No leads assigned to you yet." : "No leads yet"}
+                  </div>
+                ) : recentLeads.map(lead => {
+                  const status = getStatusMeta(lead.status)
+                  const telHref = `tel:${lead.phone.replace(/[^\d+]/g, "")}`
+                  return (
+                    <div key={lead.id} className="lead-row">
+                      <Link href={`/leads/${lead.id}`} className="lead-row-link">
+                        <div className="lead-avatar" style={{ background: avatarColor(lead.name) }}>
+                          {initials(lead.name)}
+                        </div>
+                        <div className="lead-row-main">
+                          <div className="lead-row-name">{lead.name}</div>
+                          <div className="lead-row-sub">
+                            {lead.phone}
+                            {lead.source && <> · {lead.source.replace(/_/g, " ")}</>}
+                          </div>
+                        </div>
+                        <div className="lead-row-meta">
+                          <span className="lead-row-status" style={{ background: status.bg, color: status.color }}>
+                            {status.label}
+                          </span>
+                        </div>
+                      </Link>
+                      <a href={telHref} className="lead-row-call" aria-label={`Call ${lead.name}`}>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                      </a>
+                    </div>
+                  )
+                })}
               </div>
             </div>
 
@@ -170,8 +220,8 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          {/* Quick Nav Column */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {/* Quick Nav Column — desktop only (bottom tab bar replaces this on mobile) */}
+          <div className="hide-on-mobile" style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
             <div style={{ fontSize: "16px", fontWeight: 700, color: "#1a1a2e", marginBottom: "4px" }}>Quick Access</div>
             <Link href="/leads" className="quick-link">
               <div className="quick-link-icon" style={{ background: "#EFF6FF" }}>

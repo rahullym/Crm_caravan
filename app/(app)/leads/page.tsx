@@ -63,8 +63,14 @@ export default async function LeadsPage({
         </div>
         <div className="topbar-right">
           <LeadStatusFilter salesUsers={salesUsers} isAdmin={isAdmin} />
-          {isAdmin && <BulkUploadModal />}
-          <AddLeadModal />
+          {isAdmin && (
+            <span className="hide-on-mobile">
+              <BulkUploadModal />
+            </span>
+          )}
+          <span className="hide-on-mobile">
+            <AddLeadModal />
+          </span>
         </div>
       </div>
 

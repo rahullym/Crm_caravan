@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
 
 const navItems = [
   {
@@ -53,30 +52,13 @@ const navItems = [
   }
 ]
 
-export default function Sidebar() {
+export default function Sidebar({ open = false, onClose }: { open?: boolean; onClose?: () => void } = {}) {
   const pathname = usePathname()
   const { data: session } = useSession()
-  const [open, setOpen] = useState(false)
-
-  // Close sidebar on route change (mobile nav UX)
-  useEffect(() => { setOpen(false) }, [pathname])
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(o => !o)}
-        aria-label={open ? "Close menu" : "Open menu"}
-        className="sidebar-toggle"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
-          {open
-            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
-            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
-        </svg>
-      </button>
-
-      {open && <div className="sidebar-backdrop" onClick={() => setOpen(false)} />}
+      {open && <div className="sidebar-backdrop" onClick={onClose} />}
 
       <aside className={`sidebar${open ? " open" : ""}`}>
       <div className="sidebar-logo">
@@ -94,11 +76,13 @@ export default function Sidebar() {
       <nav style={{ flex: 1 }}>
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+          // Pipeline is hidden in the mobile drawer (kanban isn't usable on phones)
+          const mobileHideClass = item.href === "/pipeline" ? " hide-on-mobile" : ""
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`nav-item ${isActive ? "active" : ""}`}
+              className={`nav-item ${isActive ? "active" : ""}${mobileHideClass}`}
             >
               {item.icon}
               {item.label}
@@ -110,7 +94,7 @@ export default function Sidebar() {
           <>
             <Link
               href="/settings/pipeline"
-              className={`nav-item ${pathname.startsWith("/settings/pipeline") ? "active" : ""}`}
+              className={`nav-item hide-on-mobile ${pathname.startsWith("/settings/pipeline") ? "active" : ""}`}
             >
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
@@ -128,7 +112,7 @@ export default function Sidebar() {
             </Link>
             <Link
               href="/settings/integrations"
-              className={`nav-item ${pathname.startsWith("/settings/integrations") ? "active" : ""}`}
+              className={`nav-item hide-on-mobile ${pathname.startsWith("/settings/integrations") ? "active" : ""}`}
             >
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>

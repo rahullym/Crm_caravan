@@ -1,4 +1,4 @@
-import Sidebar from "@/components/Sidebar"
+import AppNav from "@/components/AppNav"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -12,7 +12,7 @@ export default function AppLayout({
 }) {
   return (
     <div style={{ display: "flex", minHeight: "100vh", width: "100%" }}>
-      <Sidebar />
+      <AppNav />
       <div className="main-content">
         {children}
       </div>

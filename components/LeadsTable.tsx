@@ -168,7 +168,7 @@ export default function LeadsTable({
     <>
       {/* Bulk assign toolbar */}
       {isAdmin && selected.size > 0 && (
-        <div style={{
+        <div className="leads-bulk-bar" style={{
           display: "flex", alignItems: "center", gap: 12,
           padding: "10px 20px", background: "var(--primary-light)",
           borderBottom: "1px solid var(--border-color)",
@@ -218,7 +218,7 @@ export default function LeadsTable({
         </div>
       )}
 
-      <div className="table-scroll">
+      <div className="table-scroll leads-table-wrap">
       <table className="data-table data-table--compact">
         <thead>
           <tr>
@@ -352,6 +352,57 @@ export default function LeadsTable({
           })}
         </tbody>
       </table>
+      </div>
+
+      {/* ── Mobile list (shown <700px) ── */}
+      <div className="leads-card-list">
+        {sortedLeads.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-state-icon">📋</div>
+            <div className="empty-state-text">
+              {isAdmin ? "No leads yet" : "No leads assigned to you yet"}
+            </div>
+            <div className="empty-state-hint">
+              {isAdmin ? "Tap + Add Lead to get started." : "Ask an admin to assign you some leads."}
+            </div>
+          </div>
+        ) : sortedLeads.map(lead => {
+          const status = getStatusMeta(lead.status)
+          const telHref = `tel:${lead.phone.replace(/[^\d+]/g, "")}`
+          return (
+            <div key={lead.id} className="lead-row">
+              <Link href={`/leads/${lead.id}`} className="lead-row-link">
+                <div className="lead-avatar" style={{ background: avatarColor(lead.name) }}>
+                  {initials(lead.name)}
+                </div>
+                <div className="lead-row-main">
+                  <div className="lead-row-name">{lead.name}</div>
+                  <div className="lead-row-sub">
+                    {lead.phone}
+                    {lead.source && <> · {lead.source.replace(/_/g, " ")}</>}
+                  </div>
+                </div>
+                <div className="lead-row-meta">
+                  <span
+                    className="lead-row-status"
+                    style={{ background: status.bg, color: status.color }}
+                  >
+                    {status.label}
+                  </span>
+                </div>
+              </Link>
+              <a
+                href={telHref}
+                className="lead-row-call"
+                aria-label={`Call ${lead.name}`}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+              </a>
+            </div>
+          )
+        })}
       </div>
     </>
   )
