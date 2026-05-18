@@ -93,6 +93,7 @@ enum Role {
 
 enum LeadSource {
   META
+  GOOGLE_ADS
   WEBSITE
   REFERRAL
   SHOW

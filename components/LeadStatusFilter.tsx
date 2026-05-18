@@ -5,6 +5,7 @@ import { LEAD_STATUSES } from "@/lib/lead-statuses"
 
 const LEAD_SOURCES = [
   { value: "META", label: "Meta" },
+  { value: "GOOGLE_ADS", label: "Google Ads" },
   { value: "WEBSITE", label: "Website" },
   { value: "REFERRAL", label: "Referral" },
   { value: "SHOW", label: "Show / Expo" },

@@ -124,11 +124,8 @@ export default function PipelineStagesEditor({ initialStages }: { initialStages:
         {stages.map((stage, idx) => (
           <div
             key={stage.value}
+            className="pipeline-stage-row"
             style={{
-              display: "grid",
-              gridTemplateColumns: "36px 1fr 200px 140px 80px 80px",
-              gap: 12,
-              alignItems: "center",
               padding: "12px 16px",
               background: stage.visible ? "#fff" : "#F8FAFC",
               border: "1px solid var(--border-color)",

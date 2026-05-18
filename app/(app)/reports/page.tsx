@@ -59,7 +59,7 @@ export default async function ReportsPage() {
     : leadsThisMonth > 0 ? "+100" : "0"
 
   const sourceColors: Record<string, string> = {
-    META: "#1877F2", WEBSITE: "#10B981",
+    META: "#1877F2", GOOGLE_ADS: "#EA4335", WEBSITE: "#10B981",
     REFERRAL: "#F59E0B", SHOW: "#8B5CF6", OTHER: "#94A3B8",
   }
 
@@ -120,7 +120,7 @@ export default async function ReportsPage() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 24 }}>
+        <div className="responsive-2col" style={{ marginBottom: 24 }}>
 
           {/* Leads by Status */}
           <div className="card">
@@ -193,7 +193,7 @@ export default async function ReportsPage() {
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+        <div className="responsive-2col">
           {/* Follow-up Activity */}
           <div className="card">
             <div className="card-header">

@@ -29,7 +29,7 @@ export default async function ServicesPage() {
         <div className="topbar-title">Services</div>
         <span style={{ fontSize: "13px", color: "#9CA3AF" }}>{services.length} requests</span>
       </div>
-      <div className="page-container" style={{ display: "grid", gridTemplateColumns: "340px 1fr", gap: "20px", alignItems: "start" }}>
+      <div className="page-container responsive-aside-grid">
         <ServiceForm caravans={caravans} technicians={technicians} />
         <div className="card">
           <div className="card-header">

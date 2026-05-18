@@ -34,11 +34,12 @@ const NEXT_ACTIONS = [
 ]
 
 const LEAD_SOURCES = [
-  { value: "META",     label: "Meta / Facebook" },
-  { value: "WEBSITE",  label: "Website" },
-  { value: "REFERRAL", label: "Referral" },
-  { value: "SHOW",     label: "Show / Expo" },
-  { value: "OTHER",    label: "Other" },
+  { value: "META",       label: "Meta / Facebook" },
+  { value: "GOOGLE_ADS", label: "Google Ads" },
+  { value: "WEBSITE",    label: "Website" },
+  { value: "REFERRAL",   label: "Referral" },
+  { value: "SHOW",       label: "Show / Expo" },
+  { value: "OTHER",      label: "Other" },
 ]
 
 const LEAD_STATUSES = [

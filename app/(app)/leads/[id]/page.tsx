@@ -91,7 +91,7 @@ export default async function LeadDetailsPage({
       <div className="page-container">
 
         {/* ── Quick Stat Row ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 20 }}>
+        <div className="responsive-stats-4" style={{ marginBottom: 20 }}>
           <div className="stat-card">
             <div className="stat-label">Phone</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-main)", marginTop: 4 }}>{lead.phone}</div>
@@ -117,7 +117,7 @@ export default async function LeadDetailsPage({
         </div>
 
         {/* ── Main 3-col grid: details | follow-up form | history ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, alignItems: "start" }}>
+        <div className="responsive-3col">
 
           {/* ── COL 1: Lead Details ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>

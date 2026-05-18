@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut, useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 
 const navItems = [
   {
@@ -55,9 +56,29 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname()
   const { data: session } = useSession()
+  const [open, setOpen] = useState(false)
+
+  // Close sidebar on route change (mobile nav UX)
+  useEffect(() => { setOpen(false) }, [pathname])
 
   return (
-    <aside className="sidebar">
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-label={open ? "Close menu" : "Open menu"}
+        className="sidebar-toggle"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round">
+          {open
+            ? <><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>
+            : <><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></>}
+        </svg>
+      </button>
+
+      {open && <div className="sidebar-backdrop" onClick={() => setOpen(false)} />}
+
+      <aside className={`sidebar${open ? " open" : ""}`}>
       <div className="sidebar-logo">
         <div className="sidebar-logo-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5}>
@@ -146,5 +167,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   )
 }

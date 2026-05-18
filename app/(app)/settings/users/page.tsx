@@ -31,7 +31,7 @@ export default async function UserManagementPage() {
       </div>
 
       <div className="page-container">
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 24, alignItems: "start" }}>
+        <div className="responsive-aside-grid--rev">
 
           {/* User List Table */}
           <div className="card">
