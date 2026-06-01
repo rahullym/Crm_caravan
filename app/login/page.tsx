@@ -41,7 +41,7 @@ export default function LoginPage() {
             </svg>
           </div>
         </div>
-        <div className="login-title">CaravanCRM</div>
+        <div className="login-title">Hike Lead Manager</div>
         <div className="login-sub">Sign in to your account to continue</div>
 
         <form onSubmit={handleSubmit}>

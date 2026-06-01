@@ -9,8 +9,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Caravan CRM",
-  description: "Caravan Sales & Service Management System",
+  title: "Hike Lead Manager",
+  description: "Hike Lead Manager — Sales & Service Management System",
 };
 
 export default function RootLayout({

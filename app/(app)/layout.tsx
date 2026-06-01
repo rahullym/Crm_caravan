@@ -2,7 +2,7 @@ import AppNav from "@/components/AppNav"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Caravan CRM",
+  title: "Hike Lead Manager",
 }
 
 export default function AppLayout({

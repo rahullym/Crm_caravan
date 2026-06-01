@@ -70,7 +70,7 @@ export default function Sidebar({ open = false, onClose }: { open?: boolean; onC
             <circle cx="18.5" cy="18.5" r="2.5" fill="white" stroke="white"/>
           </svg>
         </div>
-        <span className="sidebar-logo-text">CaravanCRM</span>
+        <span className="sidebar-logo-text">Hike Lead Manager</span>
       </div>
 
       <nav style={{ flex: 1 }}>

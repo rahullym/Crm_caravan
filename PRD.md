@@ -1,4 +1,4 @@
-# Caravan CRM — Product Requirements Document
+# Hike Lead Manager — Product Requirements Document
 
 **Status:** Live · v0.1
 **Repo:** [rahullym/Crm_caravan](https://github.com/rahullym/Crm_caravan)
